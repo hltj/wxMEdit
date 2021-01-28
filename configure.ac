@@ -50,18 +50,23 @@ case "${host}" in
     ;;
 esac
 
-# Checks for glib2, gtk2 libraries
+# Checks for glib2, gtk3 libraries
 #AM_PATH_GLIB_2_0(2.6.0)
-#AM_PATH_GTK_2_0(2.6.0)
+#AM_PATH_GTK_3_0(3.24.0)
 
 #if test "x$IS_MACOS" == "x"; then
 #fi
-PKG_CHECK_MODULES(glib_gtk2, [
-        glib-2.0 >= 2.6.0
-        gtk+-2.0 >= 2.6.0
-])
-CXXFLAGS="$CXXFLAGS $glib_gtk2_CFLAGS"
-LIBS="$LIBS $glib_gtk2_LIBS -lX11"
+
+GTK_MAJOR=3
+AC_ARG_WITH(gtk,
+    [  --with-gtk=VERSIOM      use GTK major version number [[default=3]]],
+    [GTK_MAJOR=$withval])
+
+PKG_CHECK_MODULES(glib_gtk, [gtk+-$GTK_MAJOR.0 >= $GTK_MAJOR.0.0 glib-2.0 >= 2.6.0])
+CXXFLAGS="$CXXFLAGS $glib_gtk_CXXFLAGS -lX11"
+LIBS="$LIBS $glib_gtk_LIBS -lX11"
+AC_MSG_CHECKING([GTK major version])
+AC_MSG_RESULT([$GTK_MAJOR])
 
 PKG_CHECK_MODULES([curl], [libcurl])
 
@@ -69,6 +74,7 @@ PKG_CHECK_MODULES([curl], [libcurl])
 AC_ARG_WITH(aui, 
     [  --with-aui=PATH         use additional wxAUI library path],
     [WXAUI="$withval"])
+
 if test "w$WXAUI" != "x"; then
     CPPFLAGS="$CXXFLAGS -I$WXAUI/include"
     LIBS="$LIBS -L$WXAUI/lib"
